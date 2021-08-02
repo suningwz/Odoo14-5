@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-extend="KanbanView.buttons">
+        <t t-jquery="button" t-operation="replace">
+            <t t-if="widget and widget.modelName == 'cortex.document'" t-name="CortexDocument.upload_attachment">
+                <button type="button" class="btn btn-primary o_button_upload_attachment">
+                    Upload
+                </button>
+            </t>
+            <t t-else="">
+                <button type="button" class="btn btn-primary o-kanban-button-new" accesskey="c">
+                    Create
+                </button>
+            </t>
+        </t>
+    </t>
+
+</templates>

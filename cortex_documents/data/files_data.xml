@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data noupdate="1">
+
+        <record id="cortex_documents_Test_PDF_pdf" model="cortex.document">
+            <field name="name">Test_PDF.pdf</field>
+            <!--field name="datas" type="base64" file="cortex_documents/data/files/Test_PDF.pdf"/-->
+            <field name="folder_id" ref="cortex_documents.cortex_documents_internal_folder"/>
+            <field name="tag_ids" eval="[(6,0,[ref('cortex_documents.cortex_documents_internal_status_inbox')])]"/>
+        </record>
+
+        <!--record id="cortex_documents_Test_PDF_2.pdf" model="cortex.document">
+            <field name="name">Test_PDF_2.pdf</field>
+            <field name="datas" type="base64" file="cortex_documents/data/files/Test_PDF_2.pdf"/>
+            <field name="folder_id" ref="cortex_documents.cortex_documents_internal_folder"/>
+            <field name="tag_ids" eval="[(6,0,[ref('cortex_documents.cortex_documents_internal_status_inbox')])]"/>
+        </record-->
+
+    </data>
+</odoo>
