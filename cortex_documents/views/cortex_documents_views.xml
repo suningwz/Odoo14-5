@@ -36,7 +36,7 @@
         <field name="name">Document kanban view</field>
         <field name="model">cortex.document</field>
         <field name="arch" type="xml">
-            <kanban class="o_hr_employee_kanban" create="false">
+            <kanban class="o_hr_employee_kanban">
                 <field name="id"/>
                 <field name="mimetype"/>
                 <field name="owner_id"/>
@@ -92,7 +92,7 @@
         <field name="model">cortex.document</field>
         <field name="priority" eval="1"/>
         <field name="arch" type="xml">
-            <form create="false">
+            <form>
                 <header>
                     <button type="object" name="access_content" string="Download" class="oe_highlight" />
                     <button type="object" name="toggle_active" string="Archive" attrs="{'invisible': [('active', '=', False)]}"/>
@@ -143,7 +143,7 @@
         <field name="name">Document list view</field>
         <field name="model">cortex.document</field>
         <field name="arch" type="xml">
-            <tree create="false" edit="false">
+            <tree>
                 <field name="id" optional="hide" groups="base.group_no_one"/>
                 <field name="name" string="Document" required="True"/>
                 <field name="tag_ids" widget="many2many_tags"/>
