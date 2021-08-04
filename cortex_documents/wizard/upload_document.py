@@ -9,7 +9,7 @@ class CortexDocumentUpload(models.TransientModel):
     _description = "Document Upload"
 
 
-    owner_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string="Owner", tracking=True, required=True,)
+    owner_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string="Owner", required=True,)
     folder_id = fields.Many2one('cortex.folder', string="Folder", required=True)
     files = fields.Many2many(comodel_name='ir.attachment', relation='class_ir_attachments_rel_cortex', column1='class_id', column2='attachment_id', string='Attachments')
     res_model = fields.Char('Resource Model')
