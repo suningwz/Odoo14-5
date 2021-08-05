@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="cortex_document_search_view" model="ir.ui.view">
+        <field name="name">Document search view</field>
+        <field name="model">cortex.document</field>
+        <field name="arch" type="xml">
+            <search string="Documents">
+                <field name="name" string="Document"/>
+                <field name="tag_ids"/>
+                <field name="owner_id"/>
+                <field name="partner_id" string="Contact"/>
+                <field name="index_content"/>
+                <field name="create_uid" string="Created by"/>
+                <filter string="My Documents" name="my_documents_filter" domain="[('owner_id', '=', uid)]"/>
+                <separator/>
+                <filter string="PDF/Document" name="pdf_doc" domain="['|', ('mimetype', 'ilike', 'pdf'), ('name', 'ilike', '.doc')]"/>
+                <filter string="Image/Video" name="img_video" domain="['|', ('mimetype', 'ilike', 'image'), ('mimetype', 'ilike', 'video')]"/>
+                <separator/>
+                <filter string="Archived" name="Inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="owner" string="Owner" domain="[]" context="{'group_by':'create_uid'}"/>
+                    <filter name="by_model" string="Model" domain="[]" context="{'group_by': 'res_model'}"/>
+                    <filter name="creation_month" string="Creation Date" domain="[]" context="{'group_by':'create_date'}"/>
+                </group>
+                <searchpanel>
+                    <field name="folder_id"/>
+                    <field name="tag_ids" select="multi" groupby="category_id" icon="fa-tag" enable_counters="1"/>
+                    <!--field name="res_model" select="multi" string="Attached To" icon="fa-file-text" color="#338FFC" enable_counters="1"/-->
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+    
+    <record id="cortex_document_kanban_view" model="ir.ui.view">
+        <field name="name">Document kanban view</field>
+        <field name="model">cortex.document</field>
+        <field name="arch" type="xml">
+            <kanban class="o_hr_employee_kanban">
+                <field name="id"/>
+                <field name="mimetype"/>
+                <field name="owner_id"/>
+                <field name="create_uid"/>
+                <field name="create_date"/>
+                <field name="active"/>
+                <field name="checksum"/>
+                <field name="name"/>
+                <field name="res_model_name"/>
+                <field name="res_model"/>
+                <field name="res_name"/>
+                <field name="activity_ids"/>
+                <field name="activity_state"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_hr_kanban_record">
+                            <field name="thumbnail" widget="image" class="o_kanban_image_fill_left d-none d-md-block"/>
+                            <div class="o_kanban_details">
+                                <div class="o_kanban_details_wrapper">
+                                    <div t-att-title="record.name.raw_value" class="o_kanban_record_title">
+                                        <field name="name" required="True" class="o_text_overflow"/>
+                                    </div>
+                                    <div class="o_kanban_record_body">
+                                        <t t-if="record.res_model_name.raw_value &amp;&amp; record.res_model.raw_value !== 'cortex.document'">
+                                            <strong><field name="res_model_name"/></strong>
+                                            <t t-if="record.res_name.raw_value">
+                                                <span t-att-title="record.res_name.raw_value">: <field name="res_name"/></span>
+                                            </t>
+                                        </t>
+                                        <samp t-else="" class="text-muted"> </samp>
+                                        <field name="tag_ids" widget="many2many_tags"/>
+                                    </div>
+                                    <div class="o_kanban_record_bottom flex-wrap">
+                                        <time class="oe_kanban_bottom_left">
+                                            <field name="create_date" widget="date"/>
+                                        </time>
+                                        <div class="oe_kanban_bottom_right">
+                                            <field name="activity_ids" widget="kanban_activity"/>
+                                            <field name="owner_id" widget="many2one_avatar_user"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="cortex_document_form_view" model="ir.ui.view">
+        <field name="name">Document form view</field>
+        <field name="model">cortex.document</field>
+        <field name="priority" eval="1"/>
+        <field name="arch" type="xml">
+            <form create="false"> 
+                <header>
+                    <button type="object" name="access_content" string="Download" class="oe_highlight" />
+                    <button type="object" name="toggle_active" string="Archive" attrs="{'invisible': [('active', '=', False)]}"/>
+                    <button type="object" name="toggle_active" string="Restore" attrs="{'invisible': [('active', '=', True)]}"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <field name="thumbnail" nolabel="1" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;:&quot;thumbnail&quot;}" attrs="{ 'invisible' : [('thumbnail', '=', False)]}"/>
+                    <div class="oe_title" aria-label="Name">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" class="oe_inline" required="True"/>
+                        </h1>
+                    </div>
+                    <field name="active" invisible="1"/>
+                    <field name="res_id" invisible="1"/>
+                    <field name="res_model" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="datas" string="File" filename="name" />
+                            <field name="folder_id" />
+                            <field name="owner_id" />
+                            <field name="partner_id"/>
+                            <field name="tag_ids" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="create_date"/>
+                            <field name="create_uid"/>
+                        </group>
+                    </group>
+                    <group groups="base.group_no_one">
+                        <field name="group_ids" widget="many2many_tags"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="file_size" />
+                        <field name="mimetype"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="cortex_document_list_view" model="ir.ui.view">
+        <field name="name">Document list view</field>
+        <field name="model">cortex.document</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false">
+                <field name="id" optional="hide" groups="base.group_no_one"/>
+                <field name="name" string="Document" required="True"/>
+                <field name="tag_ids" widget="many2many_tags"/>
+                <field name="partner_id"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="create_date" widget="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="cortex_folder_search_view" model="ir.ui.view">
+        <field name="name">Folder search view</field>
+        <field name="model">cortex.folder</field>
+        <field name="arch" type="xml">
+        <search>
+            <field name="name"/>
+            <field name="parent_folder_id"/>
+            <filter string="Parent Folder" name="by_parent" domain="[]" context="{'group_by': 'parent_folder_id'}"/>
+         </search>
+        </field>
+    </record>
+
+    <record id="cortex_folder_tree_view" model="ir.ui.view">
+        <field name="name">Folder tree view</field>
+        <field name="model">cortex.folder</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="display_name" string="Folder"/>
+                <field name="category_ids"  widget="many2many_tags" string="Tag Categories"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="group_ids" widget="many2many_tags"/>
+                <field name="read_group_ids" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="cortex_folder_form_view" model="ir.ui.view">
+        <field name="name">Folder form view</field>
+        <field name="model">cortex.folder</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button type="object" name="action_upload_wizard" string="Upload" class="oe_highlight" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_see_documents" type="object" class="oe_stat_button" icon="fa-file-text-o" attrs="{'invisible' : [('document_count', '=', 0)]}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="document_count"/></span>
+                                <span class="o_stat_text">Documents</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="E.g. Folder name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="parent_folder_id" domain="[('id', '!=', id)]"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Tags" name="tags">
+                            <field name="category_ids" context="{
+                                'form_view_ref' : 'cortex_documents.cortex_category_form_view',
+                                'default_folder_id' : id,
+                                'simple_name': True
+                            }">
+                                <tree>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name" string="Category"/>
+                                    <field name="tag_ids"
+                                           string="Tags"
+                                           domain="[('category_id', '=' , id)]"
+                                           context="{'default_category_id' : id}"
+                                           options="{'no_create_edit': True}"
+                                           widget="many2many_tags"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Access Rights" name="access_rights">
+                            <group>
+                                <group string="Write Access">
+                                    <field name="group_ids" widget="many2many_tags"/>
+                                </group>
+                                <group string="Read Access">
+                                    <field name="read_group_ids" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Description" name="description">
+                            <field name="description" widget="html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="cortex_category_search_view" model="ir.ui.view">
+        <field name="name">Category tag search view</field>
+        <field name="model">cortex.category</field>
+        <field name="arch" type="xml">
+        <search>
+            <field name="name"/>
+            <field name="tag_ids"/>
+            <field name="folder_id"/>
+            <group expand="0" string="Group By">
+                <filter string="Folder" name="group_by_folder" domain="[]" context="{'group_by': 'folder_id'}"/>
+            </group>
+         </search>
+        </field>
+    </record>
+
+    <record id="cortex_category_form_view" model="ir.ui.view">
+        <field name="name">Category tag form view</field>
+        <field name="priority" eval="2"/>
+        <field name="model">cortex.category</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="E.g. Category name"/></h1>
+                    </div>
+                    <group>
+                        <field name="folder_id" required="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Tags" name="tags">
+                            <field name="tag_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="display_name" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="cortex_category_tree_view" model="ir.ui.view">
+        <field name="name">Category tag tree view</field>
+        <field name="model">cortex.category</field>
+        <field name="arch" type="xml">
+            <tree default_order="sequence">
+                <field name="folder_id"/>
+                <field name="name" string="Category"/>
+                <field name="tag_ids" string="Tags" widget="many2many_tags"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="cortex_tag_search_view" model="ir.ui.view">
+        <field name="name">Tag search view</field>
+        <field name="model">cortex.tag</field>
+        <field name="arch" type="xml">
+        <search>
+            <field name="name" string="Tag"/>
+            <field name="category_id"/>
+         </search>
+        </field>
+    </record>
+
+    <record id="cortex_tag_from_view" model="ir.ui.view">
+        <field name="name">Tag form view</field>
+        <field name="model">cortex.tag</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <field name="category_id" string="Category"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="cortex_document_action" model="ir.actions.act_window">
+      <field name="name">Documents</field>
+      <field name="res_model">cortex.document</field>
+      <field name="view_mode">kanban,tree,form</field>
+      <field name="domain">[]</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+        (0, 0, {'view_mode': 'kanban', 'view_id': ref('cortex_documents.cortex_document_kanban_view')}),
+        (0, 0, {'view_mode': 'tree', 'view_id': ref('cortex_documents.cortex_document_list_view')})]"/>
+      <field name="help" type="html">
+        <p class="o_view_nocontent_smiling_face">Upload <span class="font-weight-normal">a file or</span> drag <span class="font-weight-normal">it here.</span></p>
+      </field>
+    </record>
+
+    <record id="cortex_category_action" model="ir.actions.act_window">
+      <field name="name">Tags</field>
+      <field name="res_model">cortex.category</field>
+      <field name="context">{'simple_name': True}</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('cortex_documents.cortex_category_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': False})]"/>
+    </record>
+
+    <record id="cortex_folder_action" model="ir.actions.act_window">
+      <field name="name">Folders</field>
+      <field name="res_model">cortex.folder</field>
+      <field name="view_mode">tree,form</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('cortex_documents.cortex_folder_tree_view')}),
+            (0, 0, {'view_mode': 'form', 'view_id': False})]"/>
+    </record>
+
+    <menuitem name="Documents" id="cortex_documents.menu_root" groups="cortex_documents.group_cortex_documents_user" web_icon="cortex_documents,static/description/icon.png"/>
+
+    <menuitem name="Documents" id="cortex_documents.dashboard" parent="cortex_documents.menu_root" action="cortex_document_action" groups="cortex_documents.group_cortex_documents_user" sequence="0"/>
+    <menuitem name="Configuration" id="cortex_documents.Config" parent="cortex_documents.menu_root" sequence="1"/>
+
+    <menuitem name="Folders" id="cortex_documents.folder_menu" parent="cortex_documents.Config" action="cortex_folder_action" groups="cortex_documents.group_cortex_documents_manager" sequence="1"/>
+    <menuitem name="Tags" id="cortex_documents.category_menu" parent="cortex_documents.Config" action="cortex_category_action" sequence="2"/>
+
+</odoo>
