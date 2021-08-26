@@ -14,6 +14,7 @@ class ProductTemplate(models.Model):
     file_name = fields.Char(string='FileName')
     documents = fields.One2many('cortex.document', 'document_owner', string="Documents")
     category_name = fields.Char('Category name', related='categ_id.name')
+    length = fields.Float(string="Length")
 
     @api.onchange('drawing_no', 'drawing_version')
     def onchange_drawing_no(self):
