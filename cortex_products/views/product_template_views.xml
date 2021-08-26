@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="product_template_only_form_view_inherit" model="ir.ui.view">
+            <field name="name">product.template.form.view</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/>
+            <field name="active" eval="True"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='barcode']" position="after">
+                        <label for="drawing_no" string="Drawing #"/>
+                        <div class="o_row" >
+                            <field name="drawing_no" style="margin-right: 10px;"/>
+                            <span attrs="{'invisible':[('drawing_version','=',False)]}" style="margin-right: 10px;"> - </span>
+                            <field name="drawing_version" help="Drawing Version"/>
+                        </div>
+                    </xpath>
+                    <xpath expr="//field[@name='description']" position="after">
+                        <field name="drawing_pdf" colspan="2" nolabel="1" filename="file_name" widget="pdf_viewer"/>
+                        <field name="file_name" invisible="1"/>
+                    </xpath>
+                    <xpath expr="//page[@name='general_information']/group" position="after">
+                        <group class="o_row" string="Documents">
+                            <field name="category_name" invisible="1"/>
+                            <field name="documents" nolabel="1" widget="many2many" context="{'search_default_folder_name': category_name, 'default_folder_name': category_name}"/>
+                        </group>
+                    </xpath>
+                    <field name="default_code" position="replace"/>
+                    <xpath expr="//div[@class='oe_title']" position="replace">
+                        <div class="oe_title">
+                            <label class="oe_edit_only" for="default_code" string="Part Number"/>
+                            <h1>
+                                <field name="default_code" placeholder="Part Number" required="1"/>
+                            </h1>
+                            <group>
+                                <field name="name" string="Product Name"/>
+                            </group>
+                            <div name="options" groups="base.group_user">
+                                <div>
+                                    <field name="sale_ok"/>
+                                    <label for="sale_ok"/>
+                                </div>
+                                <div>
+                                    <field name="purchase_ok"/>
+                                    <label for="purchase_ok"/>
+                                </div>
+                            </div>
+                        </div>
+                    </xpath>
+                    <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
+                        <label for="length"/>
+                        <div class="o_row" >
+                            <field name="length"/>
+                            <span>Inches</span>
+                        </div>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <record id="product_template_search_view_inherit" model="ir.ui.view">
+            <field name="name">product.template.search.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <field name="drawing_number"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="product_list_view_inherit" model="ir.ui.view">
+            <field name="name">Product List</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="model">product.template</field>
+            <field name="arch" type="xml">
+                <field name="uom_id" position="after">
+                    <field name="drawing_number"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -37,6 +37,7 @@ class CortexDocument(models.Model):
     partner_id = fields.Many2one('res.partner', string="Contact", tracking=True)
     owner_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string="Owner", tracking=True)
     folder_id = fields.Many2one('cortex.folder', string="Folder", ondelete="restrict", tracking=True, required=True, index=True)
+    folder_name = fields.Char('Folder name', related='folder_id.name')
     company_id = fields.Many2one('res.company', string='Company', related='folder_id.company_id', readonly=True)
     group_ids = fields.Many2many('res.groups', string="Access Groups", readonly=True, related='folder_id.group_ids')
 
