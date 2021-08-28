@@ -50,9 +50,11 @@
                     </xpath>
                     <xpath expr="//group[@name='group_lots_and_weight']" position="inside">
                         <label for="length"/>
-                        <div class="o_row">
-                            <field name="length"/>
-                            <span>Inches</span>
+                        <div class="o_row" name="length">
+                            <field name="length" string="Length"/>
+                            <span>
+                                Inches
+                            </span>
                         </div>
                     </xpath>
                 </data>
