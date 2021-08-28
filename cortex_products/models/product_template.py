@@ -14,7 +14,7 @@ class ProductTemplate(models.Model):
     file_name = fields.Char(string='FileName')
     documents = fields.One2many('cortex.document', 'document_owner', string="Documents")
     category_name = fields.Char('Category name', related='categ_id.name')
-    length = fields.Float(string="Length")
+    length = fields.Float('Length', compute='_compute_length', digits='Stock Length', inverse='_set_length', store=True)
 
     @api.onchange('drawing_no', 'drawing_version')
     def onchange_drawing_no(self):
@@ -35,6 +35,19 @@ class ProductTemplate(models.Model):
             for doc in record.documents:
                 if doc.mimetype == 'application/pdf':
                     record.drawing_pdf = doc.datas
+    
+    @api.depends('product_variant_ids', 'product_variant_ids.length')
+    def _compute_length(self):
+        unique_variants = self.filtered(lambda template: len(template.product_variant_ids) == 1)
+        for template in unique_variants:
+            template.length = template.product_variant_ids.length
+        for template in (self - unique_variants):
+            template.length = 0.0
+
+    def _set_length(self):
+        for template in self:
+            if len(template.product_variant_ids) == 1:
+                template.product_variant_ids.length = template.length
 
 
 class DocumentProduct(models.Model):
