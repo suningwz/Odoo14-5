@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import api, fields, models
+from odoo import api, fields, models, _
 
 
 class ProductTemplate(models.Model):
@@ -15,6 +15,9 @@ class ProductTemplate(models.Model):
     documents = fields.One2many('cortex.document', 'document_owner', string="Documents")
     category_name = fields.Char('Category name', related='categ_id.name')
     length = fields.Float('Length', compute='_compute_length', digits='Stock Length', inverse='_set_length', store=True)
+    machine_parts_count = fields.Integer(string='Machine Part', compute='_compute_installed_parts_ids')
+    installed_parts_count = fields.Integer(string='Installed Part', compute='_compute_installed_parts_ids')
+    installed_quantity = fields.Float(string="Installed Quantity",compute="_compute_installed_parts_ids",digits='New Cortex Precision')
 
     @api.onchange('drawing_no', 'drawing_version')
     def onchange_drawing_no(self):
@@ -48,6 +51,41 @@ class ProductTemplate(models.Model):
         for template in self:
             if len(template.product_variant_ids) == 1:
                 template.product_variant_ids.length = template.length
+    
+    @api.depends('product_variant_id')
+    def _compute_installed_parts_ids(self):
+        for product in self:
+            machine_parts = self.env['installed.part'].search([('installed_part_detail_id.product_id', 'in', product.product_variant_id.ids)])
+            installed_parts = self.env['installed.part.detail'].search(
+                [('product_id', 'in',  product.product_variant_id.ids)])
+
+            total=0
+            for record in installed_parts:
+                total += record.installed_knife
+
+            product.installed_quantity = total
+            product.machine_parts_count = len(machine_parts)
+            product.installed_parts_count = len(installed_parts)
+
+    def action_view_machine_parts(self):
+        return {
+            'name': _('Machine Center'),
+            'res_model': 'installed.part',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'list,form',
+            'domain': [('installed_part_detail_id.product_id', 'in', self.product_variant_id.ids)],
+            'context': {'default_partner_id':self.id}
+        }
+
+    def action_view_installed_parts(self):
+        return {
+            'name': _('Installed Part'),
+            'res_model': 'installed.part.detail',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'list,form',
+            'domain': [('product_id', 'in', self.product_variant_id.ids)],
+            'context': {'search_default_filter_frequency': 1}
+        }
 
 
 class DocumentProduct(models.Model):
