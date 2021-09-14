@@ -29,13 +29,9 @@ class MailComposeMessage(models.TransientModel):
                         if product.drawing_pdf:
                             attachment = self.env['ir.attachment'].sudo().search([('res_model','=', 'product.template'),('res_id', '=', str(product_tmpl_id.id)),('res_field','=', 'drawing_pdf')])
                             if attachment:
-                                attachment.name = product.file_name
                                 lst_of_attachment.append([4, attachment.id])
                     
                     if lst_of_attachment:
                         self.sudo().write({'attachment_ids' : lst_of_attachment})
                     else:
                         raise Warning(_("No any attachment exist in the PO products."))
-
-                
-
