@@ -77,9 +77,42 @@
             <field name="inherit_id" ref="product.product_template_tree_view"/>
             <field name="model">product.template</field>
             <field name="arch" type="xml">
+                <field name="default_code" position="replace"/>
+                <field name="name" position="before">
+                    <field name="default_code" string="Part Number"/>
+                </field>
+                <field name="name" position="attributes">
+                    <attribute name="string">Product Description</attribute>
+                </field>
                 <field name="uom_id" position="after">
                     <field name="drawing_number"/>
                 </field>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="product_template_form_view_procurement_button_inherit">
+            <field name="name">product.template_procurement</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="stock.product_template_form_view_procurement_button"/>
+            <field name="arch" type="xml">
+                <button name="action_product_tmpl_forecast_report" position="after">
+                    <button type="object" name="action_view_machine_parts" class="oe_stat_button"  icon="fa-gear">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value">
+                            <field name="machine_parts_count"/>
+                        </span>
+                        <span class="o_stat_text">Machine Centers</span>
+                        </div>
+                    </button>
+                    <button type="object" name="action_view_installed_parts" class="oe_stat_button" icon="fa-wrench">
+                        <div class="o_field_widget o_stat_info">
+                            <span class="o_stat_value">
+                            <field name="installed_parts_count"/>
+                            </span>
+                            <span class="o_stat_text">Installed Part</span>
+                        </div>
+                    </button>
+                </button>
             </field>
         </record>
 
