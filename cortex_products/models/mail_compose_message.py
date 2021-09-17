@@ -27,7 +27,7 @@ class MailComposeMessage(models.TransientModel):
                             lst_of_attachment.append([4, attachment.attachment_id.id])
                         
                         if product.drawing_pdf:
-                            attachment = self.env['ir.attachment'].sudo().search([('res_model','=', 'product.template'),('res_id', '=', str(product_tmpl_id.id)),('res_field','=', 'drawing_pdf')])
+                            attachment = self.env['ir.attachment'].sudo().search([('res_model','=', 'product.template'),('res_id', '=', str(product_tmpl_id.id))])
                             if attachment:
                                 lst_of_attachment.append([4, attachment.id])
                     
