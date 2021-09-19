@@ -61,7 +61,7 @@ class InstalledPart(models.Model):
                 self.is_conicals = False
         else:
             self.is_chipper = False
-            self.is_conicas = False
+            self.is_conicals = False
             self.is_drumhead = False
 
     def name_get(self):
