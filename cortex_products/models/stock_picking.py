@@ -7,7 +7,7 @@ class StockPicking(models.Model):
     _inherit = "stock.picking"
 
 
-    product_and_demand = fields.Text('Attachment Description', compute='_compute_product_and_demand', store=True, default="")
+    product_and_demand = fields.Text('Attachment Description', compute='_compute_product_and_demand', store=True, default=" ")
 
     @api.depends('move_ids_without_package', 'product_id')
     def _compute_product_and_demand(self):
