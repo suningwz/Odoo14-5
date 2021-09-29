@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="mrp_production_form_view_inherit" model="ir.ui.view">
+            <field name="name">mrp.production.form</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="model">mrp.production</field>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                    <button type="object" name="action_open_sale_orders"   class="oe_stat_button"
+                     icon="fa-bar-chart" attrs="{'invisible': [('sale_order_count', '=', 0)]}">
+                        <field string="Sale Orders" name="sale_order_count" widget="statinfo" />
+                    </button>
+                </xpath>
+                <field name="user_id" position="after">
+                    <field name="partner_id"/>
+                    <field name="currency_id" required="1"/>
+                    <field name="purchase_order_id" domain="[('state', '!=', 'cancel')]" context="{'partner_id':partner_id}"
+                           attrs="{'readonly':[('state', 'in', ['done', 'cancel'])]}" />
+                    <field name="sale_order_ids" widget="many2many_taglinks" domain="[('state', '!=', ('cancel','draft','sent'))]"
+                           attrs="{'readonly':[('state', 'in', ['done', 'cancel'])]}" />
+                </field>
+                <field name="bom_id" position="after">
+                    <field name="origin"/>
+                    <field name="project_id" context="{'default_partner_id': partner_id}"/>
+                </field>
+
+            </field>
+        </record>
+    </data>
+</odoo>
