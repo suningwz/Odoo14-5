@@ -7,7 +7,7 @@
         <field name="model">purchase.order</field>
         <field name="arch" type="xml">
             <field name="partner_id" position="after">
-                <field name="select_sale_order_ids" widget="many2many_taglinks"/>
+                <field name="sale_order_ids" widget="many2many_taglinks"/>
             </field>
             <xpath expr="//sheet/group/group[2]" position="inside">
                 <field name="project_id"/>
@@ -19,13 +19,21 @@
                 </div>
             </xpath>
             <div name="button_box" position="inside">
-                <button name="action_view_advance_payment" class="oe_stat_button" icon="fa-money" type="object"  
-                    attrs="{'invisible': [('payment_count', '=', 0)]}">
+                <button type="object" name="action_view_sale_orders" class="oe_stat_button"
+                    icon="fa-bar-chart-o" attrs="{'invisible': [('sale_count', '=', 0)]}">
+                    <field string="Sale Order" name="sale_count" widget="statinfo"/>
+                </button>
+                <button type="object" name="action_view_manufacturing_orders" class="oe_stat_button"
+                    icon="fa-wrench" attrs="{'invisible': [('manufacturing_count', '=', 0)]}">
+                    <field string="Manufacturing Order" name="manufacturing_count" widget="statinfo"/>
+                </button>
+                <button type="object" name="action_view_advance_payment" class="oe_stat_button" 
+                    icon="fa-money" attrs="{'invisible': [('payment_count', '=', 0)]}">
                     <field string="Advance Payment" name="payment_count" widget="statinfo"/>
                 </button>
             </div>
             <xpath expr="//header" position="inside">
-                <button name="action_advance_payment" string="Advance Payment" type="object" 
+                <button type="object" name="action_advance_payment" string="Advance Payment"
                     attrs="{'invisible': [('state', 'not in', ('purchase', 'done'))]}"/>
             </xpath>
         </field>

@@ -13,7 +13,7 @@
     'installable': True,
     'website': 'https://github.com/mounirlahsini',
 
-    'depends': ['base', 'mail', 'product', 'cortex_documents', 'mrp', 'sale', 'contacts', 'project', 'account', 'stock'],
+    'depends': ['base', 'mail', 'product', 'cortex_documents', 'mrp', 'sale', 'contacts', 'project', 'account', 'stock', 'purchase'],
 
     'data': [
         'security/ir.model.access.csv',
@@ -30,7 +30,7 @@
         'views/sale_order_views.xml',
         'views/mrp_production_views.xml',
         'views/project_views.xml',
-        'views/stock_picking_views.xml',
+        #'views/stock_move_views.xml',
 
     ],
 

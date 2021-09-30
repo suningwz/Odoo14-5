@@ -12,15 +12,20 @@ class MrpProduction(models.Model):
         'sale': [('readonly', True)],
     }
 
+    project_id = fields.Many2one('project.project', string='Project', states=READONLY_STATES, tracking=True)
     partner_id = fields.Many2one('res.partner', string='Vendor', readonly=True, states={'draft': [('readonly', False)]})
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True, states={'draft': [('readonly', False)]}, 
         default=lambda self: self.env.company.currency_id)
-    purchase_order_id = fields.Many2one('purchase.order', string='Purchase Order', copy=False)
     sale_order_ids = fields.Many2many('sale.order', string='Sale Orders')
-    sale_order_count = fields.Integer(compute='_compute_sale_order_count', string='Sale Order')
-    project_id = fields.Many2one('project.project', string='Project', states=READONLY_STATES, tracking=True)
+    sale_count = fields.Integer(compute='_compute_sale_count', string='Sale Orders')
+    purchase_order_ids = fields.Many2many('purchase.order', string='Purchase Order')
+    purchase_count = fields.Integer(compute='_compute_purchase_count', string='Purchase Orders')
 
-    def action_open_sale_orders(self):
+    def _compute_sale_count(self):
+        sale_order = self.env['sale.order'].search([('id', '=', self.sale_order_ids.ids)])
+        self.sale_count = len(sale_order)
+
+    def action_view_sale_orders(self):
         sale_obj = self.env['sale.order'].search([('id', '=',self.sale_order_ids.ids)])
         sale_ids = []
         view_id = self.env.ref('sale.view_order_form').id
@@ -45,8 +50,37 @@ class MrpProduction(models.Model):
                 'view_mode': 'list,form',
                 'domain': [('id', '=', self.sale_order_ids.ids)],
             }
+    
+    def _compute_purchase_count(self):
+        purchase_order = self.env['purchase.order'].search([('id', '=', self.purchase_order_ids.ids)])
+        self.purchase_count = len(purchase_order)
 
-
-    def _compute_sale_order_count(self):
-        sale_order = self.env['sale.order'].search([('id', '=', self.sale_order_ids.ids)])
-        self.sale_order_count = len(sale_order)
+    def action_view_purchase_orders(self):
+        purchase_obj = self.env['purchase.order'].search([('id', '=', self.purchase_order_ids.ids)])
+        purchase_ids = []
+        for each in purchase_obj:
+            purchase_ids.append(each.id)
+        view_id = self.env.ref('purchase.purchase_order_form').id
+        if purchase_ids:
+            if len(purchase_ids) <= 1:
+                value = {
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': 'purchase.order',
+                    'view_id': view_id,
+                    'type': 'ir.actions.act_window',
+                    'name': _('Purchase orders'),
+                    'res_id': purchase_ids and purchase_ids[0]
+                }
+            else:
+                value = {
+                    'domain': str([('id', 'in', purchase_ids)]),
+                    'view_type': 'form',
+                    'view_mode': 'tree,form',
+                    'res_model': 'purchase.order',
+                    'view_id': False,
+                    'type': 'ir.actions.act_window',
+                    'name': _('Purchase orders'),
+                    'res_id': purchase_ids
+                }
+            return value

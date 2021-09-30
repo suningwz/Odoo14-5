@@ -6,12 +6,11 @@ from odoo import api, fields, models, _
 class Project(models.Model):
     _inherit = "project.project"
 
-    sales_count = fields.Integer(compute='_compute_sale_count', string='Sale Order')
-    purchase_count = fields.Integer(compute='_compute_purchase_count', string='Purchase Order')
-    manufacturing_count = fields.Integer(compute='_compute_manufacturing_count', string='Manufacturing Order')
+    sales_count = fields.Integer(compute='_compute_sale_count', string='Sale Orders')
+    purchase_count = fields.Integer(compute='_compute_purchase_count', string='Purchase Orders')
+    manufacturing_count = fields.Integer(compute='_compute_manufacturing_count', string='Manufacturing Orders')
     
-
-    def action_view_sale_order(self):
+    def action_view_sale_orders(self):
         action = self.env.ref('sale.action_orders').read()[0]
         sale_order = self.env['sale.order'].search([('project_id', '=', self.id)])
         action['domain'] = [('id', 'in', sale_order.ids)]
@@ -27,7 +26,7 @@ class Project(models.Model):
             sale_order = self.env['sale.order'].search([('project_id', '=', record.id)])
             record.sales_count = len(sale_order)
 
-    def action_view_purchase_order(self):
+    def action_view_purchase_orders(self):
         action = self.env.ref('purchase.purchase_form_action').read()[0]
         purchase_order = self.env['purchase.order'].search([('project_id', '=', self.id)])
         action['domain'] = [('id', 'in', purchase_order.ids)]
@@ -43,7 +42,7 @@ class Project(models.Model):
             purchase_order = self.env['purchase.order'].search([('project_id', '=', record.id)])
             record.purchase_count = len(purchase_order)
 
-    def action_view_manufacturing_order(self):
+    def action_view_manufacturing_orders(self):
         action = self.env.ref('mrp.mrp_production_action').read()[0]
         manufacturing_order = self.env['mrp.production'].search([('project_id', '=', self.id)])
         action['domain'] = [('id', 'in', manufacturing_order.ids)]

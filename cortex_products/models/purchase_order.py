@@ -13,7 +13,9 @@ class PurchaseOrder(models.Model):
     }
 
     project_id = fields.Many2one('project.project', string='Project', states=READONLY_STATES, tracking=True)
-    select_sale_order_ids = fields.Many2many('sale.order', string='Sale Orders')
+    sale_order_ids = fields.Many2many('sale.order', string='Sale Orders')
+    sale_count = fields.Integer(compute='_compute_sale_count', string='Sale Orders')
+    manufacturing_count = fields.Integer(compute='_compute_manufacturing_count', string='Manufacturing Orders')
     rfq = fields.Char(string='RFQ', compute='_compute_rfq_po', store=True)
     payment_ids = fields.One2many('account.payment', 'purchase_order_id', string='Account Payment')
     payment_count = fields.Integer(compute='_compute_account_payment_count', string='Purchase Order')
@@ -48,7 +50,7 @@ class PurchaseOrder(models.Model):
     @api.depends('advance_payment', 'amount_total', 'invoice_status')
     def _compute_percentage_paid(self):
         for record in self:
-            if record.invoice_status != 'invoiced':
+            if record.invoice_status != 'invoiced' and record.amount_total > 0:
                 record.percentage_paid = (record.advance_payment / record.amount_total)*100
             else :
                 record.percentage_paid = 0
@@ -90,3 +92,71 @@ class PurchaseOrder(models.Model):
             'target': 'new',
             'type': 'ir.actions.act_window',
         }
+
+    def _compute_sale_count(self):
+        sale_order = self.env['sale.order'].search([('id', '=', self.sale_order_ids.ids)])
+        self.sale_count = len(sale_order)
+    
+    def action_view_sale_orders(self):
+        sale_obj = self.env['sale.order'].search([('id', '=', self.sale_order_ids.ids)])
+        sale_ids = []
+        for each in sale_obj:
+            sale_ids.append(each.id)
+        view_id = self.env.ref('sale.view_order_form').id
+        if sale_ids:
+            if len(sale_ids) <= 1:
+                value = {
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': 'sale.order',
+                    'view_id': view_id,
+                    'type': 'ir.actions.act_window',
+                    'name': _('Sale orders'),
+                    'res_id': sale_ids and sale_ids[0]
+                }
+            else:
+                value = {
+                    'domain': str([('id', 'in', sale_ids)]),
+                    'view_type': 'form',
+                    'view_mode': 'tree,form',
+                    'res_model': 'sale.order',
+                    'view_id': False,
+                    'type': 'ir.actions.act_window',
+                    'name': _('Sale orders'),
+                    'res_id': sale_ids
+                }
+            return value
+    
+    def _compute_manufacturing_count(self):
+        manufacturing_order = self.env['mrp.production'].search([('purchase_order_ids', 'in', self.id)])
+        self.manufacturing_count = len(manufacturing_order) 
+    
+    def action_view_manufacturing_orders(self):
+        manufacturing_obj = self.env['mrp.production'].search([('purchase_order_ids', 'in', self.id)])
+        manufacturing_ids = []
+        for each in manufacturing_obj:
+            manufacturing_ids.append(each.id)
+        view_id = self.env.ref('mrp.mrp_production_form_view').id
+        if manufacturing_ids:
+            if len(manufacturing_ids) <= 1:
+                value = {
+                    'view_type': 'form',
+                    'view_mode': 'form',
+                    'res_model': 'mrp.production',
+                    'view_id': view_id,
+                    'type': 'ir.actions.act_window',
+                    'name': _('Manufacturing orders'),
+                    'res_id': manufacturing_ids and manufacturing_ids[0]
+                }
+            else:
+                value = {
+                    'domain': str([('id', 'in', manufacturing_ids)]),
+                    'view_type': 'form',
+                    'view_mode': 'tree,form',
+                    'res_model': 'mrp.production',
+                    'view_id': False,
+                    'type': 'ir.actions.act_window',
+                    'name': _('Manufacturing orders'),
+                    'res_id': manufacturing_ids
+                }
+            return value
