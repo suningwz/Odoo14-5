@@ -13,7 +13,7 @@
     'installable': True,
     'website': 'https://github.com/mounirlahsini',
 
-    'depends': ['base', 'mail', 'product', 'cortex_documents', 'mrp', 'sale', 'contacts'],
+    'depends': ['base', 'mail', 'product', 'cortex_documents', 'sale', 'contacts', 'stock', 'purchase'],
 
     'data': [
         'security/ir.model.access.csv',
