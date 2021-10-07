@@ -13,7 +13,7 @@
     'installable': True,
     'website': 'https://github.com/mounirlahsini',
 
-    'depends': ['base', 'mail', 'mrp', 'sale', 'project', 'account', 'stock', 'purchase'],
+    'depends': ['base', 'mail', 'mrp', 'sale', 'project', 'account', 'stock', 'purchase', 'sale_project'],
 
     'data': [
         'views/cortex_products_assets.xml',
