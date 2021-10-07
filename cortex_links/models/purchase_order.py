@@ -6,13 +6,8 @@ from odoo import api, fields, models, _
 class PurchaseOrder(models.Model):
     _inherit = "purchase.order"
 
-    READONLY_STATES = {
-        'purchase': [('readonly', True)],
-        'done': [('readonly', True)],
-        'cancel': [('readonly', True)],
-    }
 
-    project_id = fields.Many2one('project.project', string='Project', states=READONLY_STATES, tracking=True)
+    project_id = fields.Many2one('project.project', string='Project', tracking=True)
     sale_order_ids = fields.Many2many('sale.order', string='Sale Orders')
     sale_count = fields.Integer(compute='_compute_sale_count', string='Sale Orders')
     manufacturing_count = fields.Integer(compute='_compute_manufacturing_count', string='Manufacturing Orders')
@@ -87,7 +82,7 @@ class PurchaseOrder(models.Model):
             'name': _('Register Payment'),
             'res_model': 'account.payment',
             'view_mode': 'form',
-            'view_id': self.env.ref('cortex_products.view_account_payment_form_custom').id,
+            'view_id': self.env.ref('cortex_links.view_account_payment_form_custom').id,
             'context': ctx,
             'target': 'new',
             'type': 'ir.actions.act_window',

@@ -1,4 +1,4 @@
-odoo.define('cortex_products.clickable_tag', function (require) {
+odoo.define('cortex_links.clickable_tag', function (require) {
     "use strict";
     
     var core = require('web.core');

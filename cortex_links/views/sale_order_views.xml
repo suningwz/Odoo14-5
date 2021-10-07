@@ -18,6 +18,8 @@
             </div>
             <xpath expr="//sheet/group/group[1]" position="inside">
                 <field name="project_id" context="{'default_partner_id': partner_id}"/>
+                <field name="purchase_order_ids" widget="many2many_taglinks" domain="[('state', '!=', 'cancel')]" 
+                    context="{'partner_id':partner_id}" attrs="{'readonly':[('state', 'in', ['done', 'cancel'])]}" />
             </xpath>
             <field name="client_order_ref" position="attributes">
                 <attribute name="invisible">1</attribute>
@@ -25,6 +27,19 @@
             <field name="payment_term_id" position="after">
                 <field name="client_order_ref"/>
             </field>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="sale_order_search_view_inherit">
+        <field name="name">sale.order.search.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+        <field name="arch" type="xml">
+            <filter name="draft" position="before">
+                <filter name="open_order" string="Open Orders" domain="[('pending_amount', '>',0)]"/>
+                <filter name="open_knife_order" string="Open Knife Orders" domain="[['pending_amount','>',0],['has_knife_order','=',True]]"/>
+                <separator/>
+            </filter>
         </field>
     </record>
 

@@ -26,7 +26,7 @@
                 </field>
                 <field name="bom_id" position="after">
                     <field name="origin"/>
-                    <field name="project_id" context="{'default_partner_id': partner_id}"/>
+                    <field name="project_id"/>
                 </field>
 
             </field>

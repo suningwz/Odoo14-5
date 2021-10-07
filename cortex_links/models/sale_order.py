@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
+from odoo.addons import decimal_precision as dp
 
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
+
 
     READONLY_STATES = {
         'draft': [('readonly', True)],
@@ -13,12 +15,46 @@ class SaleOrder(models.Model):
     }
 
     project_id = fields.Many2one('project.project', string='Project', states=READONLY_STATES, tracking=True)
+    purchase_order_ids = fields.Many2many('purchase.order', string='Purchase Order')
     purchase_count = fields.Integer(compute='_compute_purchase_count', string='Purchase Orders')
     manufacturing_count = fields.Integer(compute='_compute_manufacturing_count', string='Manufacturing Orders')
+    pending_amount = fields.Float('Pending Amount', compute='_compute_pending_amount', store=True)
+    has_knife_order = fields.Boolean(compute='_compute_has_knife_order', string='Has Knife Order', default=False, store=True)
+
+    @api.depends('state', 'order_line.product_id', 'order_line.product_uom_qty', 'order_line.qty_delivered', 'order_line.net_price')
+    def _compute_pending_amount(self):
+        for record in self:
+            line_pending_amount = 0
+            pending_amounts = 0
+            if record.state not in ('draft', 'sent'):
+                for line in record.order_line:
+                    if line.is_downpayment == True:
+                        advance_payment = line.product_uom_qty * line.net_price
+                        qty = line.product_uom_qty - line.qty_delivered
+                        line_pending_amount = (qty * line.net_price) - advance_payment
+                    else:
+                        qty = line.product_uom_qty - line.qty_delivered
+                        line_pending_amount = qty * line.net_price
+                    pending_amounts += line_pending_amount
+                record.pending_amount = pending_amounts
+            else:
+                record.pending_amount = 0.0
+    
+    @api.depends('order_line.product_id')
+    def _compute_has_knife_order(self):        
+        for record in self:
+            if record.order_line:
+                for line in record.order_line:
+                    if line.product_id.categ_id.name in ('Cortex Knives V-3 Finished', 'Bridge Knives'):
+                        record.has_knife_order = True
+            else :
+                record.has_knife_order = False
+
 
     def _compute_purchase_count(self):
         purchase_order = self.env['purchase.order'].search([('sale_order_ids', 'in', self.id)])
-        self.purchase_count = len(purchase_order) 
+        self.purchase_count = len(purchase_order)
+        self.purchase_order_ids = purchase_order
     
     def action_view_purchase_orders(self):
         purchase_obj = self.env['purchase.order'].search([('sale_order_ids', 'in', self.id)])
@@ -83,3 +119,13 @@ class SaleOrder(models.Model):
                     'res_id': manufacturing_ids
                 }
             return value
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    net_price = fields.Float('Discounted Price', digits=dp.get_precision('Discount'))
+
+    @api.onchange('discount', 'price_unit')
+    def _onchange_discount(self):
+        if not self._context.get('is_discount'):
+            self.net_price = self.price_unit - ((self.price_unit * self.discount) / 100)

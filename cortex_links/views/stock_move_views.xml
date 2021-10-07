@@ -23,7 +23,7 @@
                 <separator/>
                 <filter name="late" string="Late" domain="[('rep_scheduled_date','&lt;', time.strftime('%%Y-%%m-%%d %%H:%%M:%%S')), ('rep_state', 'in', ('assigned', 'waiting', 'confirmed'))]" help="Transfers that are late on scheduled time"/>
                 <separator/>
-                <filter name="backorder" string="Backorders" domain="[('rep_backorder_id', '!=', False), ('rep_state', 'in', ('assigned', 'waiting', 'confirmed'))]" help="Remaining parts of picking partially processed"/>
+                <filter name="backorder" string="Backorders" domain="[('rep_backorder_ids', '!=', False), ('rep_state', 'in', ('assigned', 'waiting', 'confirmed'))]" help="Remaining parts of picking partially processed"/>
                 <separator/>
                 <group expand="0" string="Group By">
                     <filter string="Status" name="status" domain="[]" context="{'group_by': 'rep_state'}"/>
@@ -39,36 +39,42 @@
         <field name="name">stock.move.report.tree</field>
         <field name="model">stock.move</field>
         <field name="arch" type="xml">
-            <tree string="Picking list" multi_edit="1"
+            <tree string="Picking list" create="false" edit="false" delete="false" import="false"
                   decoration-info="rep_state == 'draft'" decoration-muted="rep_state == 'cancel'"
-                  decoration-danger="rep_state not in ('cancel', 'done') and rep_scheduled_date &lt; current_date">
+                  decoration-danger="rep_state not in ('cancel', 'done') and rep_scheduled_date &lt; current_date" default_order="rep_name asc">
+                <button icon="fa-truck" name="open_delivery" type="object"/>
                 <field name="rep_name"/>
                 <field name="rep_location_id" options="{'no_create': True}" string="From" groups="stock.group_stock_multi_locations" optional="show"/>
                 <field name="rep_location_dest_id" options="{'no_create': True}" string="To" groups="stock.group_stock_multi_locations" optional="show"/>
                 <field name="rep_partner_id" optional="show"/>
                 <field name="rep_user_id" optional="hide"/>
-                <field name="rep_date" invisible="1"/>                    
+                <field name="rep_date" optional="show"/>                    
                 <field name="rep_scheduled_date" optional="show"/>
                 <field name="rep_origin" optional="show"/>
                 <field name="rep_group_id" invisible="1"/>
-                <field name="rep_backorder_id" optional="hide"/>
+                <field name="rep_backorder_ids" optional="hide"/>
+                <field name="product_id" optional="show"/>
+                <field name="product_uom_qty" optional="show"/>
                 <field name="rep_state" optional="show"/>
+                <field name="state" optional="hide"/>
                 <field name="rep_priority" optional="hide"/>
                 <field name="rep_picking_type_id" optional="hide"/>
                 <field name="rep_company_id" groups="base.group_multi_company" optional="show"/>
-                <field name="activity_exception_decoration" widget="activity_exception"/>
             </tree>
         </field>
     </record>
 
     <record id="action_stock_move_report_all" model="ir.actions.act_window">
         <field name="name">Transfers</field>
-        <field name="res_model">stock.move</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_mode">tree,form</field>
-        <field name="domain"></field>
-        <field name="context">{'contact_display': 'partner_address', 'default_rep_company_id': allowed_company_ids[0]}</field>
+        <field name="res_model">stock.move</field>
+        <field name="view_ids"
+                   eval="[(5, 0, 0),
+                          (0, 0, {'view_mode': 'tree', 'view_id': ref('stock_move_report_tree_view')})]"/>
         <field name="search_view_id" ref="stock_move_report_search_view"/>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('rep_state', '!=', False)]</field>
+        <field name="context">{'contact_display': 'partner_address', 'default_rep_company_id': allowed_company_ids[0]}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new transfer

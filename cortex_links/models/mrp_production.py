@@ -6,13 +6,8 @@ from odoo import api, fields, models, _
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
 
-    READONLY_STATES = {
-        'draft': [('readonly', True)],
-        'sent': [('readonly', True)],
-        'sale': [('readonly', True)],
-    }
 
-    project_id = fields.Many2one('project.project', string='Project', states=READONLY_STATES, tracking=True)
+    project_id = fields.Many2one('project.project', string='Project', tracking=True)
     partner_id = fields.Many2one('res.partner', string='Vendor', readonly=True, states={'draft': [('readonly', False)]})
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True, states={'draft': [('readonly', False)]}, 
         default=lambda self: self.env.company.currency_id)
